@@ -85,28 +85,20 @@ app.use(passport.session());
 
 app.use((req, res, next) => {
   
-  if(req.url == "/users/login" && req.method == "POST"){
+  if(req.headers.authorization) {
 
-    next()
+    let token = req.headers.authorization.split(' ')[1]
+      
+    jwt.verify(token, process.env.APP_SECRET, (err, _) => {
+      if(err){
+        res.status(401).jsonp({erro: err})
+        return
+      }
+      next()
+    })
 
   } else {
-
-    if(req.headers.authorization) {
-
-      let token = req.headers.authorization.split(' ')[1]
-      
-      jwt.verify(token, process.env.APP_SECRET, (err, _) => {
-        if(err){
-          res.status(401).jsonp({erro: err})
-          return
-        }
-        next()
-      })
-
-    } else {
-      res.status(401).jsonp({erro: "Authorization header not set."})
-    }
-    
+    res.status(401).jsonp({erro: "Authorization header not set."})
   }
   
 })
