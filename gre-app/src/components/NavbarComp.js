@@ -24,7 +24,7 @@ export default function NavbarComp(props){
                 {props.items ? 
                     <Nav className="links" activeKey={activeLink}>
                         {props.items.map((el, idx) => {
-                           return <Nav.Link as="div" className="link" onClick={() => {setActive(idx + 1); history.push(props.path + "/" + el.name)}} eventKey={idx + 1} className="links" href={el.href}>{el.cont}</Nav.Link> 
+                           return <Nav.Link key={idx} as="div" className="link" onClick={() => {setActive(idx + 1); history.push(props.path + "/" + el.name)}} eventKey={idx + 1} className="links" href={el.href}>{el.cont}</Nav.Link> 
                         })} 
                     </Nav>
                     :

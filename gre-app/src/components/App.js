@@ -15,10 +15,13 @@ function App( props ) {
 
   const auth = () => {
     let token = localStorage.getItem("token") 
+
     let ret = false;
+
     if(token){
       jwt.verify(token, process.env.REACT_APP_JWT_SCRET, (err, data) => {
         if(!err){
+          console.log("Im here")
           ret = true
         } 
       })

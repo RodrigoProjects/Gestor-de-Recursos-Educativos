@@ -28,12 +28,13 @@ export default function LoginRegisterComp(props){
                 localStorage.setItem("token", dados.data.token)
 
                 let user = jwt.decode(dados.data.token)
-                setUser(user)
+                console.log(user)
 
                 localStorage.setItem("user", JSON.stringify(user))
 
                 setError("")
                 setLogin({...login, loading: false})
+                setUser(user)
                 
             }).catch(e => {
                 if(e.response){
