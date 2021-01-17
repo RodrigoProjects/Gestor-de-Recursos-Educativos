@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken')
 
 
 
-function App() {
+function App( props ) {
 
   const auth = () => {
     let token = localStorage.getItem("token") 
@@ -32,19 +32,19 @@ function App() {
     <Router>
       <Switch>
         <Route path="/" exact>
+          {localStorage.getItem('token') && localStorage.getItem("user") ? <Redirect to={JSON.parse(localStorage.getItem("user")).tipo.toLowerCase()} /> : ""}
           <HomePage />
         </Route>
         <Route path="/user" >
           <Auth comp={<UserRouter />} authorized={auth} /> 
         </Route>
         <Route path="/creator"> 
-          <CreatorRouter />
+          <Auth comp={<CreatorRouter path="/creator"/>} authorized={auth} /> 
         </Route>
         <Route path="/admin">
-          <AdminRouter />
+          <Auth comp={<AdminRouter path="/admin" />} authorized={auth} /> 
         </Route>
       </Switch>
-      {localStorage.getItem("user") ? <Redirect to={JSON.parse(localStorage.getItem("user")).tipo.toLowerCase()} /> : ""}
     </Router>
     
   );

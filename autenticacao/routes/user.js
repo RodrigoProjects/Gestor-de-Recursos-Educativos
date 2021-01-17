@@ -41,7 +41,7 @@ router.delete('/:user_id', (req, res) => {
 })
   
 router.post('/login', passport.authenticate('local'), function(req, res){
-  jwt.sign({nome: req.user.nome, email: req.user.email, tipo: req.user.tipo, course: req.user.course}, process.env.JWT_SECRET , (e, token) => {
+  jwt.sign({nome: req.user.nome, email: req.user.email, tipo: req.user.tipo, course: req.user.course}, process.env.JWT_SECRET , {expiresIn :"2h"}, (e, token) => {
     if(e) 
       res.sendStatus(500)
     else
