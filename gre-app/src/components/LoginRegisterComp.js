@@ -1,17 +1,55 @@
 import { useState } from 'react';
 import { FaUsers, FaGithub, FaGoogle, FaTwitter } from 'react-icons/fa';
+import Alert from 'react-bootstrap/Alert'
+import Spinner from 'react-bootstrap/Spinner'
+import { Redirect } from 'react-router';
 
+const jwt = require('jsonwebtoken')
 const axios = require('axios')
 
 export default function LoginRegisterComp(props){
-    const [login, setLogin] = useState({email : "", password: ""})
+    const [login, setLogin] = useState({email : "", password: "", loading: false})
+    const [error, setError] = useState("")
+    const [user, setUser] = useState({})
 
     const sign_in = () => {
-        if(login.email.trim() != "" && login.password.trim() != ""){
+        setLogin({...login, loading: true})
 
+        if(login.email.trim() !== "" && login.password.trim() !== ""){
+
+            axios.post("http://localhost:9701/users/login", {email: login.email, password: login.password}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + jwt.sign({}, process.env.REACT_APP_SECRET)
+                    
+                }
+            }).then(dados => {
+                
+                localStorage.setItem("token", dados.data.token)
+
+                let user = jwt.decode(dados.data.token)
+                setUser(user)
+
+                localStorage.setItem("user", JSON.stringify(user))
+
+                setError("")
+                setLogin({...login, loading: false})
+                
+            }).catch(e => {
+                if(e.response){
+                    e.response.status === 401 ? setError("Credenciais inválidas!") : setError("Erro no servidor, por favor tente mais tarde.")
+                }
+                setLogin({...login, loading: false})
+            })
+        } else {
+            setError("Email e Password são necessários!")
+            setLogin({...login, loading: false})
         }
     }
 
+    if(user.tipo){
+        return (<Redirect to={user.tipo.toLowerCase()} />)
+    }
 
     return( 
         <>
@@ -22,26 +60,27 @@ export default function LoginRegisterComp(props){
                     </div>
                     <div className="card-body text-dark mt-3">
                         <div className="card-content">
+                            {error ? <Alert variant="danger" >{error}</Alert> : ""}
                             <h3 className="mt-2 mb-3 login-title display-5">
                                 Bem-vindo:
                             </h3>
                             <form className="login-form">
                                 <div className="form-group mt-3">
-                                    <label className="login-label" for="email"> 
+                                    <label className="login-label" htmlFor="email"> 
                                         Email:
                                     </label>
                                     <input onChange={(e => setLogin({...login, email: e.target.value}))} size={50} type="email" className="form-control input-login" id="email" placeholder="john@example.com" />
                                 </div>
                                 <div className="form-group mt-3">
-                                    <label className="login-label" for="password"> 
+                                    <label className="login-label" htmlFor="password"> 
                                         Password:
                                     </label>
                                     <input onChange={(e => setLogin({...login, password: e.target.value}))} size={50} type="password" className="form-control input-login" id="password" placeholder="Very secret word..." />
                                 </div>
                             </form>
                             <div className="login-buttons">
-                                <button className="btn btn-outline-success mt-5 login-button">
-                                    Login
+                                <button className="btn btn-outline-success mt-5 login-button" onClick={sign_in}>
+                                    {login.loading ? <Spinner animation="grow" variant="success" /> : "Login"}
                                 </button>
                                 <button className="btn btn-outline-primary mt-5 register-button">
                                     Registar

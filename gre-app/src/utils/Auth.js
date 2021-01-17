@@ -2,9 +2,10 @@ import { Redirect } from "react-router";
 
 
 export default function Auth(props){
+    console.log(props.authorized())
     return( 
         <>
-            {(props.auth() && props.comp) || <Redirect to="/" />}
+            {props.authorized ? props.comp : <Redirect to="/" />}
         </>
     )
 }

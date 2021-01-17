@@ -5,6 +5,8 @@ var logger = require('morgan');
 
 var jwt = require('jsonwebtoken')
 
+const cors = require('cors')
+
 require('dotenv').config() // Load -.env variables.
 
 var { v4: uuidv4 } = require('uuid');
@@ -79,6 +81,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.SESSION_SECRET));
+app.use(cors())
 
 app.use(passport.initialize());
 app.use(passport.session());

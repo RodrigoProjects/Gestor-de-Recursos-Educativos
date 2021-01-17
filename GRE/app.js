@@ -6,11 +6,6 @@ var logger = require('morgan'); // Logger on morgan mode.
 
 // Authentication ----------------------------------------------
 
-  // ** Session
-  var { v4: uuidv4 } = require('uuid');
-  var session = require('express-session');
-  const FileStore = require('session-file-store')(session);
-
   // ** Local Authentication Strategy
   var passport = require('passport')
   var LocalStrategy = require('passport-local').Strategy
