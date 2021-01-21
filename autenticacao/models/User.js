@@ -8,4 +8,4 @@ var userSchema = new mongoose.Schema({
     course: String
 })
 
-module.exports = mongoose.model('user', userSchema)
+module.exports = mongoose.model('users', userSchema)

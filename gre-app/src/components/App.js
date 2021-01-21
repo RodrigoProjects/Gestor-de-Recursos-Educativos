@@ -9,6 +9,7 @@ import Auth from "../utils/Auth.js"
 
 const jwt = require('jsonwebtoken')
 
+require('dotenv').config()
 
 
 function App( props ) {
@@ -19,11 +20,12 @@ function App( props ) {
     let ret = false;
 
     if(token){
-      jwt.verify(token, process.env.REACT_APP_JWT_SCRET, (err, data) => {
+      jwt.verify(token, process.env.REACT_APP_JWT_SECRET, (err, data) => {
         if(!err){
-          console.log("Im here")
           ret = true
-        } 
+        } else{
+          localStorage.clear()
+        }
       })
 
     }

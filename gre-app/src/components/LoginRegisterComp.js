@@ -34,6 +34,7 @@ export default function LoginRegisterComp(props){
 
                 setError("")
                 setLogin({...login, loading: false})
+                
                 setUser(user)
                 
             }).catch(e => {

@@ -1,5 +1,5 @@
 import NavbarComp from "./NavbarComp.js"
-import { useHistory } from "react-router-dom";
+import { Route, Switch, useHistory, Redirect, Link } from "react-router-dom";
 
 import { CgFeed } from "react-icons/cg";
 import { FiUsers, FiLogOut } from "react-icons/fi";
@@ -8,6 +8,7 @@ import { BsListTask} from "react-icons/bs";
 
 import Button from 'react-bootstrap/Button';
 
+import ListUsers from './ListUsers'
 
 export default function AdminPage(props){
     const history = useHistory()
@@ -27,9 +28,13 @@ export default function AdminPage(props){
                     ]
                 }
                 welcome={<span className="welcome">{"Bem-vindo " + JSON.parse(localStorage.getItem("user")).nome + "!"}</span>}
-                buttons={<Button onClick={() => {localStorage.clear(); history.push("/")}} variant="dark" > <FiLogOut size="1.5vw" style={{color: "white"}} /> </Button>}
+                buttons={<Link to="/"><Button onClick={() => {localStorage.clear()}} variant="dark" > <FiLogOut size="1.5vw" style={{color: "white"}} /> </Button></Link>}
             />
-
+            <Switch>
+                <Route path={props.path + "/utilizadores"} >
+                    <ListUsers />
+                </Route>
+            </Switch>
         </>
     )
 }

@@ -22,9 +22,9 @@ export default function NavbarComp(props){
                 />
             </Navbar.Brand>
                 {props.items ? 
-                    <Nav className="links" activeKey={activeLink}>
+                    <Nav className="links" activeKey={localStorage.getItem("selected") ? localStorage.getItem("selected") : activeLink}>
                         {props.items.map((el, idx) => {
-                           return <Nav.Link key={idx} as="div" className="link" onClick={() => {setActive(idx + 1); history.push(props.path + "/" + el.name)}} eventKey={idx + 1} className="links" href={el.href}>{el.cont}</Nav.Link> 
+                           return <Nav.Link key={idx} as="div" className="link" onClick={() => {setActive(idx + 1); history.push(props.path + "/" + el.name); localStorage.setItem("selected", idx + 1)}} eventKey={idx + 1} className="links" href={el.href}>{el.cont}</Nav.Link> 
                         })} 
                     </Nav>
                     :

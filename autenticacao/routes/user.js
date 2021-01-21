@@ -29,7 +29,11 @@ router.get('/logout', function(req, res){
 });
 
 router.post('/', (req, res) => {
-  User.registar(req.body)
+
+  let user = req.body
+  user.dataDeCriacao = new Date().toISOString()
+
+  User.registar(user)
     .then(_ => res.sendStatus(200))
     .catch(e => res.sendStatus(500))
 })
