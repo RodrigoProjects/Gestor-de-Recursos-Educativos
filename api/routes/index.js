@@ -3,8 +3,10 @@ var router = express.Router();
 
 const Recurso = require('../controllers/Recurso')
 const Pedido = require('../controllers/Pedido')
+const Noticia = require('../controllers/Noticia')
 
-//Roteamento para Recurso ---------------------------
+
+//Roteamentos CRUD para Recurso ---------------------------
 
 router.get('/recursos', function(req, res, next) {
   Recurso.getRecursos()
@@ -50,7 +52,7 @@ router.delete('/recursos/:id', function(req, res, next) {
 
 
 
-//Roteamento para Pedido ---------------------------
+//Roteamentos CRUD para Pedido ---------------------------
 
 router.get('/pedidos', function(req, res, next) {
   Pedido.getPedidos()
@@ -94,5 +96,47 @@ router.delete('/pedidos/:id', function(req, res, next) {
 //--------------------------------------------------
 
 
+//Roteamentos CRUD para Noticia ---------------------------
+
+router.get('/noticias', function(req, res, next) {
+  Noticia.getNoticias()
+    .then(nots =>{
+      res.jsonp(nots)
+    })
+    .catch(e => {
+      res.status(500).jsonp({error: e})
+    })
+});
+
+router.post('/noticias', function(req, res, next) {
+  Noticia.insert(req.body)
+    .then(_ =>{
+      res.sendStatus(200)
+    })
+    .catch(e => {
+      res.status(500).jsonp({error: e})
+    })
+});
+
+router.put('/noticias/:id', function(req, res, next) {
+  Noticia.update(req.params.id,req.body)
+    .then(_ =>{
+      res.sendStatus(200)
+    })
+    .catch(e => {
+      res.status(500).jsonp({error: e})
+    })
+});
+
+router.delete('/noticias/:id', function(req, res, next) {
+  Noticia.delete(req.params.id)
+    .then(_ =>{
+      res.sendStatus(200)
+    })
+    .catch(e => {
+      res.status(500).jsonp({error: e})
+    })
+});
+//--------------------------------------------------
 
 module.exports = router;

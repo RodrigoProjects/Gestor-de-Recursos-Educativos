@@ -1,36 +1,30 @@
-// Pedido controller
+// Noticia controller
 
-var Pedido = require('../models/Pedido')
-var Recurso = require('../models/Recurso')
+var Noticia = require('../models/Noticia')
 
-// Returns Pedidos
-module.exports.getPedidos = () => {
-    return Pedido
+// Returns Noticias
+module.exports.getNoticias = () => {
+    return Noticia
         .find()
         .exec()
 }
 
-// Inserts Pedido
-module.exports.insert = (p) => {
-    Recurso.find({recurso_id: p.recurso_id}, function (err, res) {
-        if (err) { return {} }
-        if (!res) {
-            let new_pedido = new Pedido(p)
-            return new_pedido.save()
-        }
-    })
+// Inserts Noticia
+module.exports.insert = (n) => {
+    let new_noticia = new Noticia(n)
+    return new_noticia.save()
 }
 
-// Updates Pedido
-module.exports.update = (id_pedido, campos) => {
-    return Pedido
-        .updateOne({_id:id_pedido},campos)
+// Updates Noticia
+module.exports.update = (id_noticia, campos) => {
+    return Noticia
+        .updateOne({_id:id_noticia},campos)
         .exec()
 }
 
-// Deletes Pedido
-module.exports.delete = (id_pedido) => {
-    return Pedido
-        .remove({_id:id_pedido})
+// Deletes Noticia
+module.exports.delete = (id_noticia) => {
+    return Noticia
+        .remove({_id:id_noticia})
         .exec()
 }
