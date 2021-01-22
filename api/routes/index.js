@@ -4,6 +4,8 @@ var router = express.Router();
 const Recurso = require('../controllers/Recurso')
 const Pedido = require('../controllers/Pedido')
 
+//Roteamento para Recurso ---------------------------
+
 router.get('/recursos', function(req, res, next) {
   Recurso.getRecursos()
     .then(recs =>{
@@ -44,6 +46,11 @@ router.delete('/recursos/:id', function(req, res, next) {
     })
 });
 
+//--------------------------------------------------
+
+
+
+//Roteamento para Pedido ---------------------------
 
 router.get('/pedidos', function(req, res, next) {
   Pedido.getPedidos()
@@ -54,5 +61,38 @@ router.get('/pedidos', function(req, res, next) {
       res.status(500).jsonp({error: e})
     })
 });
+
+router.post('/pedidos', function(req, res, next) {
+  Pedido.insert(req.body)
+    .then(_ =>{
+      res.sendStatus(200)
+    })
+    .catch(e => {
+      res.status(500).jsonp({error: e})
+    })
+});
+
+router.put('/pedidos/:id', function(req, res, next) {
+  Pedido.update(req.params.id,req.body)
+    .then(_ =>{
+      res.sendStatus(200)
+    })
+    .catch(e => {
+      res.status(500).jsonp({error: e})
+    })
+});
+
+router.delete('/pedidos/:id', function(req, res, next) {
+  Pedido.delete(req.params.id)
+    .then(_ =>{
+      res.sendStatus(200)
+    })
+    .catch(e => {
+      res.status(500).jsonp({error: e})
+    })
+});
+//--------------------------------------------------
+
+
 
 module.exports = router;

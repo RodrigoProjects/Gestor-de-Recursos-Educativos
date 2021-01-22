@@ -41,7 +41,7 @@ const ListUsers = (props) => {
                 {isPending && <Spinner animation="border"/>}
                 {error && <Alert variant="danger">{error.message}</Alert>}
                 {users && users.map(el => {
-                    if(search && el.nome.includes(search) || el.email.includes(search) || el.tipo.includes(search)){
+                    if((el.nome.includes(search) || el.email.includes(search) || el.tipo.includes(search))){
                         return (
                             <Card style={{ width: '18rem' }}>
                                 <Card.Img className="user-image" variant="top" src={el.avatar ? el.avatar : "http://localhost:9701/images/userDefault.png"} />
@@ -71,6 +71,8 @@ const ListUsers = (props) => {
                             </Card>
                         )
                     }
+
+                    return ""
 
                 })}
             </div>

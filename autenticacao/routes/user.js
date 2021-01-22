@@ -38,8 +38,8 @@ router.post('/', (req, res) => {
     .catch(e => res.sendStatus(500))
 })
 
-router.delete('/:user_id', (req, res) => {
-  User.remover(req.params.user_id)
+router.delete('/:email', (req, res) => {
+  User.remover(req.params.email)
     .then(_ => res.sendStatus(200))
     .catch(e => res.status(404).jsonp({error : e}))
 })
@@ -51,6 +51,12 @@ router.post('/login', passport.authenticate('local'), function(req, res){
     else
       res.status(200).jsonp({token: token})
   })
+})
+
+router.put('/:email', (req, res) => {
+  User.update(req.params.email)
+    .then(_ => res.sendStatus(200))
+    .catch(e => res.status(404).jsonp({error : e}))
 })
 
 module.exports = router;
