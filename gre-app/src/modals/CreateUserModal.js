@@ -3,37 +3,98 @@ import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 
-import useState from 'react'
+import { useState, useEffect } from 'react'
 
-import Avatar from 'react-avatar-edit'
+import Alert from 'react-bootstrap/esm/Alert';
 
-import useFetch from '../utils/useFetch'
+const jwt = require('jsonwebtoken')
 
 const CreateUserModal = (props) => {
 
-    const {data, isPending, error} = useFetch()
-    const [preview, setPreview] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null)
+    const [preview, setPreview] = useState()
+    const [user, setUser] = useState({"nome": "", "password" : "", "email": "", "tipo" : "", "course" : ""})
+    const [alert, setAlert] = useState("")
 
-    function onClose() {
-      setPreview(null);
+    const onSelectFile = e => {
+      if (!e.target.files || e.target.files.length === 0) {
+          setSelectedFile(undefined)
+          return
+      }
+
+      setSelectedFile(e.target.files[0])
     }
 
-    function onCrop(pv) {
-      setPreview(pv);
-    }
+    const submitUser = (e) => {
+      e.preventDefault()
+      
+      
+      if(user.nome.trim() !== "" && user.email.trim() !== "" && user.password.trim() !== "" && user.tipo.trim() !== "" && user.course.trim() !== ""){
+        
+        
+        let data = new FormData()
 
-    function onBeforeFileLoad(elem) {
-      if (elem.target.files[0].size > 71680) {
-        alert("File is too big!");
-        elem.target.value = "";
+        for(let el in user){
+          data.append(el, user[el])
+        }
+
+        if(selectedFile){
+          data.append("avatar", selectedFile)
+        }
+
+        console.log(user)
+        
+        fetch("http://localhost:9701/users?token=" + jwt.sign({}, process.env.REACT_APP_SECRET), {
+          method: "POST",
+          body: data
+        }).then(function (res) {
+          if (res.ok) {
+            
+            setPreview(null)   
+            setUser({"nome": "", "password" : "", "email": "", "tipo" : "", "course" : ""})
+            setAlert(null)
+            setSelectedFile(undefined)
+
+            localStorage.setItem("created", "Utilizador criado!")
+            props.showAlert()
+            props.onHide();
+
+          } else if (res.status == 401) {
+            setPreview(null)   
+            setUser({"nome": "", "password" : "", "email": "", "tipo" : "", "course" : ""})
+            setAlert("Utilizador não autenticado! Faça login.")
+          }
+        }, function (e) {
+          setPreview(null)   
+          setUser({"nome": "", "password" : "", "email": "", "tipo" : "", "course" : ""})
+          setAlert("Erro ao contactar o servidor!");
+        });
+
+
+      } else {
+        setAlert("Por favor preencha todos os camps. O avatar é opcional.")
       }
     }
+
+    useEffect(() => {
+      if (!selectedFile) {
+          setPreview(undefined)
+          return
+      }
+
+      const objectUrl = URL.createObjectURL(selectedFile)
+      setPreview(objectUrl)
+
+      // free memory when ever this component is unmounted
+      return () => URL.revokeObjectURL(objectUrl)
+    }, [selectedFile])
+
 
   return (
     <>
       <Modal
       show={props.show}
-      onHide={props.onHide}
+      onHide={() => {setSelectedFile(undefined);setAlert(null);setPreview(null);props.onHide();setUser({"nome": "", "password" : "", "email": "", "tipo" : "", "course" : ""})}}
       size="lg"
       aria-labelledby="contained-modal-title-vcenter"
     >
@@ -43,33 +104,53 @@ const CreateUserModal = (props) => {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-            <Avatar 
-              width={300}
-              height={300}
-              onCrop={onCrop}
-              onClose={onClose}
-              onBeforeFileLoad={onBeforeFileLoad}
-              src={null}
-            />
-            {preview && <img src={preview} alt="Preview" />}
+        {alert && <Alert variant="danger">{alert}</Alert>}
+        <Form onSubmit={submitUser}>
+          <Form.Group as={Col} controlId="formGridFile">
+              <Form.Label>Avatar</Form.Label>
+              <Form.Control onChange={onSelectFile} name="avatar" type="file" size="20000000" accept="image/png, image/jpeg" />
+              {selectedFile &&  <img style={{"margin-top": "2vh"}} src={preview} width={120} height={120}/> }
+          </Form.Group>
             
-            <Form.Row>
+            <Form.Row style={{"margin-top": "3vh"}}>
                 <Form.Group as={Col} controlId="formGridEmail">
                     <Form.Label>Email</Form.Label>
-                    <Form.Control type="email" placeholder="example@gmail.com" />
+                    <Form.Control required onChange={(e) => setUser({...user, "email": e.target.value})} name="email" type="email" placeholder="example@gmail.com" />
                 </Form.Group>
                 <Form.Group as={Col} controlId="formGridNome">
                     <Form.Label>Nome</Form.Label>
-                    <Form.Control type="text" placeholder="António Costa" />
+                    <Form.Control onChange={(e) => setUser({...user, "nome": e.target.value})} name="nome" type="text" placeholder="António Costa" />
                 </Form.Group>
             </Form.Row>
+            <Form.Row>
+              <Form.Group as={Col} controlId="formType">
+                <Form.Label>Tipo</Form.Label>
+                <Form.Control required onChange={(e) => setUser({...user, "tipo": e.target.value})} name="tipo" as="select" defaultValue="Escolher...">
+                  <option>Escolher...</option>
+                  <option>Admin</option>
+                  <option>Creator</option>
+                  <option>User</option>
+                </Form.Control>
+              </Form.Group>
+              <Form.Group as={Col} controlId="formCourse">
+                <Form.Label>Curso</Form.Label>
+                <Form.Control required onChange={(e) => setUser({...user, "course": e.target.value})} name="course" as="select" defaultValue="Escolher...">
+                  <option value="">Escolher...</option>
+                  <option>Todos</option>
+                  <option>MIEI</option>
+                </Form.Control>
+              </Form.Group>
+            </Form.Row>
+              <Form.Group controlId="formPassword">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control required onChange={(e) => setUser({...user, "password": e.target.value})} name="password" type="password">
+                  </Form.Control>
+              </Form.Group>
+              <Button type="submit" variant="outline-success">Criar</Button>
+            
         </Form>
 
       </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={props.onHide}>Close</Button>
-      </Modal.Footer>
     </Modal>
     </>
   )

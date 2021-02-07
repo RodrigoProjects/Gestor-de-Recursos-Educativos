@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { FaUsers, FaGithub, FaGoogle, FaTwitter } from 'react-icons/fa';
 import Alert from 'react-bootstrap/Alert'
 import Spinner from 'react-bootstrap/Spinner'
+import Button from 'react-bootstrap/Button'
+
 import { Redirect } from 'react-router';
+
+import RegisterModal from '../modals/RegisterModal'
 
 const jwt = require('jsonwebtoken')
 const axios = require('axios')
@@ -11,8 +15,11 @@ export default function LoginRegisterComp(props){
     const [login, setLogin] = useState({email : "", password: "", loading: false})
     const [error, setError] = useState("")
     const [user, setUser] = useState({})
+    const [showRegister, setShowRegister] = useState(false)
+    const [showAlert, setShow] = useState(false);
 
-    const sign_in = () => {
+    const sign_in = (e) => {
+        e.preventDefault()
         setLogin({...login, loading: true})
 
         if(login.email.trim() !== "" && login.password.trim() !== ""){
@@ -28,7 +35,6 @@ export default function LoginRegisterComp(props){
                 localStorage.setItem("token", dados.data.token)
 
                 let user = jwt.decode(dados.data.token)
-                console.log(user)
 
                 localStorage.setItem("user", JSON.stringify(user))
 
@@ -63,10 +69,15 @@ export default function LoginRegisterComp(props){
                     <div className="card-body text-dark mt-3">
                         <div className="card-content">
                             {error ? <Alert variant="danger" >{error}</Alert> : ""}
+                            {localStorage.getItem("created") && showAlert &&  
+                                <Alert variant="success" onClose={() => {setShow(false); localStorage.removeItem("created")}} dismissible>
+                                    <Alert.Heading>{localStorage.getItem("created")}</Alert.Heading>
+                                </Alert>
+                                }
                             <h3 className="mt-2 mb-3 login-title display-5">
                                 Bem-vindo:
                             </h3>
-                            <form className="login-form">
+                            <form  onSubmit={sign_in} className="login-form">
                                 <div className="form-group mt-3">
                                     <label className="login-label" htmlFor="email"> 
                                         Email:
@@ -79,15 +90,16 @@ export default function LoginRegisterComp(props){
                                     </label>
                                     <input onChange={(e => setLogin({...login, password: e.target.value}))} size={50} type="password" className="form-control input-login" id="password" placeholder="Very secret word..." />
                                 </div>
-                            </form>
-                            <div className="login-buttons">
-                                <button className="btn btn-outline-success mt-5 login-button" onClick={sign_in}>
+                                <div className="login-buttons">
+                                <button type="submit" className="btn btn-outline-success mt-5 login-button">
                                     {login.loading ? <Spinner animation="grow" variant="success" /> : "Login"}
                                 </button>
-                                <button className="btn btn-outline-primary mt-5 register-button">
+                                <Button onClick={() => setShowRegister(true)} variant="outline-primary" className="mt-5 register-button">
                                     Registar
-                                </button>
+                                </Button>
                             </div>
+                            </form>
+                           
                             <div className="login-separator">
                                 <div className="separator-icon" > 
                                     Registar com
@@ -102,6 +114,8 @@ export default function LoginRegisterComp(props){
                     </div>
                 </div>
             </div>
+
+            <RegisterModal showAlert={() => {setError(null) ;setShow(true)}} show={showRegister} onHide={() => setShowRegister(false)} />
         </> 
     )
 }

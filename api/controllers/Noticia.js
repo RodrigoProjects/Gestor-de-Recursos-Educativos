@@ -6,6 +6,7 @@ var Noticia = require('../models/Noticia')
 module.exports.getNoticias = () => {
     return Noticia
         .find()
+        .sort({dataDeCriacao: -1})
         .exec()
 }
 

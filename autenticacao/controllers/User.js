@@ -5,7 +5,7 @@ module.exports.listar = () => {
 }
 
 module.exports.consultar = email => {
-    return User.findOne({email: email}).exec()
+    return User.findOne({email: email},{_id:0}).exec()
 }
 
 module.exports.registar = u => {

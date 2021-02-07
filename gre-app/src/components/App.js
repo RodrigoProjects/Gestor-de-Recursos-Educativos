@@ -14,18 +14,22 @@ require('dotenv').config()
 
 function App( props ) {
 
-  const auth = () => {
+  const auth = (usertype) => {
     let token = localStorage.getItem("token") 
 
     let ret = false;
 
     if(token){
       jwt.verify(token, process.env.REACT_APP_JWT_SECRET, (err, data) => {
-        if(!err){
+        if(!err && data.tipo == usertype){
           ret = true
-        } else{
+
+        } else if(!err && data.tipo !== usertype){
+          ret = false
+        } else {
           localStorage.clear()
         }
+        
       })
 
     }
@@ -37,17 +41,16 @@ function App( props ) {
     <Router>
       <Switch>
         <Route path="/" exact>
-          {localStorage.getItem('token') && localStorage.getItem("user") ? <Redirect to={JSON.parse(localStorage.getItem("user")).tipo.toLowerCase()} /> : ""}
-          <HomePage />
+          {localStorage.getItem('token') && localStorage.getItem("user") ? <Redirect to={JSON.parse(localStorage.getItem("user")).tipo.toLowerCase()} /> : <HomePage />}
         </Route>
         <Route path="/user" >
-          <Auth comp={<UserRouter />} authorized={auth} /> 
+          <Auth comp={<UserRouter path="/user" />} authorized={() => auth("User")} /> 
         </Route>
         <Route path="/creator"> 
-          <Auth comp={<CreatorRouter path="/creator"/>} authorized={auth} /> 
+          <Auth comp={<CreatorRouter path="/creator"/>} authorized={() => auth("Creator")} /> 
         </Route>
         <Route path="/admin">
-          <Auth comp={<AdminRouter path="/admin" />} authorized={auth} /> 
+          <Auth comp={<AdminRouter path="/admin" />} authorized={() => auth("Admin")} /> 
         </Route>
       </Switch>
     </Router>

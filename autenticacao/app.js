@@ -36,8 +36,10 @@ passport.use(new LocalStrategy(
   {usernameField: 'email'}, (username, password, done) => {
     User.consultar(username)
       .then(user => {
+        console.log(user)
+        
         if(!user) { return done(null, false, {message: 'Utilizador inexistente!\n'})}
-        if(password != user.password) { return done(null, false, {message: 'Password inválida!\n'})}
+        if(password != user.password) { return done(null, false, {message: 'Password inválida!\n'})}     
         return done(null, user)
       })
       .catch(e => {
@@ -92,7 +94,19 @@ app.use((req, res, next) => {
   if(req.headers.authorization) {
 
     let token = req.headers.authorization.split(' ')[1]
+    
+    jwt.verify(token, process.env.APP_SECRET, (err, _) => {
+      if(err){
+        res.status(401).jsonp({erro: err})
+        return
+      }
       
+      next()
+    })
+
+  } else if(req.query.token){
+    let token = req.query.token
+
     jwt.verify(token, process.env.APP_SECRET, (err, _) => {
       if(err){
         res.status(401).jsonp({erro: err})
@@ -101,7 +115,8 @@ app.use((req, res, next) => {
       next()
     })
 
-  } else {
+  } 
+  else {
     res.status(401).jsonp({erro: "Authorization header not set."})
   }
   
