@@ -6,16 +6,19 @@ import Button from 'react-bootstrap/Button';
 import { useState, useEffect } from 'react'
 
 import Alert from 'react-bootstrap/esm/Alert';
+import useFetch from '../utils/useFetch';
 
 
 const CreateUserModal = (props) => {
 
     const [selectedFile, setSelectedFile] = useState(null)
     const [preview, setPreview] = useState()
-    const [resource, setResource] = useState(JSON.parse(localStorage.getItem("user")).tipo === "Admin" ? {"titulo": "", "acesso" : "", "estado": "", "descricao" : "", "tipo" : ""} : {"titulo": "", "acesso" : "", "estado": "", "descricao" : "", "tipo" : ""})
+    const [resource, setResource] = useState(JSON.parse(localStorage.getItem("user")).tipo === "Admin" ? {"titulo": "", "acesso" : "", "estado": "", "descricao" : "", "tipo" : ""} : {"titulo": "", "acesso" : "", "descricao" : "", "tipo" : ""})
     const [alert, setAlert] = useState("")
     const [files, setFiles] = useState({ 0 : {file: null}})
     const [fileId, setFileId] = useState(1)
+    const [token, _] = useState(localStorage.getItem("token"))
+    const {data, isPending, error} = useFetch('http://localhost:9702/api/tiporecursos', token)
     
 
     const  deleteFileForm = () => {
@@ -91,7 +94,6 @@ const CreateUserModal = (props) => {
         let data = new FormData()
 
         if(JSON.parse(localStorage.getItem("user")).tipo !== "Admin"){
-          console.log("im here")
           data.append("estado", "Em avaliação")
         }
       
@@ -199,12 +201,9 @@ const CreateUserModal = (props) => {
                 <Form.Label>Tipo</Form.Label>
                 <Form.Control required onChange={(e) => setResource({...resource, "tipo": e.target.value})} name="tipo" as="select" defaultValue="Escolher...">
                   <option value="">Escolher...</option>
-                  <option>Tese</option>
-                  <option>Teste</option>
-                  <option>Resolução de teste</option>
-                  <option>Slides teóricos</option>
-                  <option>Gravação de aula</option>
-                  <option>Trabalho de grupo</option>
+                  {data && data.map((el, idx) => {
+                    return (<option key={idx}>{el.tipo}</option>)
+                  })}
                 </Form.Control>
               </Form.Group>
               {JSON.parse(localStorage.getItem("user")).tipo == "Admin" && <Form.Group as={Col} controlId="formState">

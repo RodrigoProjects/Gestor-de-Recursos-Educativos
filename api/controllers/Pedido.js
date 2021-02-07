@@ -12,13 +12,8 @@ module.exports.getPedidos = () => {
 
 // Inserts Pedido
 module.exports.insert = (p) => {
-    Recurso.find({recurso_id: p.recurso_id}, function (err, res) {
-        if (err) { return {} }
-        if (!res) {
-            let new_pedido = new Pedido(p)
-            return new_pedido.save()
-        }
-    })
+    let new_pedido = new Pedido(p)
+    return new_pedido.save()
 }
 
 // Updates Pedido
@@ -32,5 +27,12 @@ module.exports.update = (id_pedido, campos) => {
 module.exports.delete = (id_pedido) => {
     return Pedido
         .remove({_id:id_pedido})
+        .exec()
+}
+
+// Deletes Pedido by Recurso
+module.exports.deleteByRecurso = (id_recurso) => {
+    return Pedido
+        .remove({recurso_id: id_recurso})
         .exec()
 }

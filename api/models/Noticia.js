@@ -5,7 +5,8 @@ var noticiaSchema = new mongoose.Schema({
     "conteudo": {type: String, required: true},
     "imagem": String,
     "dataDeCriacao": {type: String, required: true},
-    "autor": {type: String, required: true}
+    "autor": {type: String, required: true},
+    "href": String
 });
 
 module.exports = mongoose.model('noticias', noticiaSchema)

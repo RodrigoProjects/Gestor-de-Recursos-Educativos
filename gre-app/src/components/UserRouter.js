@@ -13,6 +13,8 @@ import ResourceDetails from './ResourceDetails'
 import Button from 'react-bootstrap/Button';
 
 import UserProfile from "./UserProfile"
+import NewsPage from "./NewsPage.js";
+import Notifications from "./NotificationsComp.js";
 
 export default function UserPage(props){
     const history = useHistory()
@@ -38,13 +40,19 @@ export default function UserPage(props){
                 <Redirect to={props.path + "/recursos"} />
             </Route>
             <Route path={props.path + "/perfil"} >
-                <UserProfile path={props.path + "/recursos"}/>
+                <UserProfile />
+            </Route>
+            <Route path={props.path + "/noticias"}>
+                <NewsPage path={props.path} edit={false}/>
             </Route>
             <Route path={props.path + "/recursos"} exact>
                 <ListResources type="/publicos" path={props.path + "/recursos"}/>
             </Route>
             <Route path={props.path + "/recursos/:id"}>
                 <ResourceDetails edit={false} path={props.path + "/recursos"}/>
+            </Route>
+            <Route path={props.path + "/notificacoes"}>
+                <Notifications path={props.path}/>
             </Route>
         </Switch>
     </>    

@@ -47,17 +47,38 @@ router.get('/logout', function(req, res){
 });
 
 router.post('/', upload.single('avatar'), (req, res) => {
-
   let user = req.body
 
-  user.dataDeCriacao = new Date().toISOString()
+  User.consultar(user.email)
+  .then(usr => {
+    if(!usr){
+  
+      user.dataDeCriacao = new Date().toISOString()
 
-  if(req.file){
-
-    fs.rename(path.join(__dirname, "../uploads/" + req.file.filename), path.join(__dirname,"../public/avatars/" + req.file.filename + "." + req.file.mimetype.split('/')[1]), (e) => {
-      if(!e){
-        user.avatar = req.file.filename + "." + req.file.mimetype.split('/')[1]
-
+      if(req.file){
+    
+        fs.rename(path.join(__dirname, "../uploads/" + req.file.filename), path.join(__dirname,"../public/avatars/" + req.file.filename + "." + req.file.mimetype.split('/')[1]), (e) => {
+          if(!e){
+            user.avatar = req.file.filename + "." + req.file.mimetype.split('/')[1]
+    
+            User.registar(user)
+              .then(_ => {
+                res.sendStatus(200)
+              }) 
+              .catch(e => {
+                res.status(500).jsonp({erro: e})
+              })
+            
+          } else {
+            res.status(500).jsonp({erro: e})
+    
+          }
+        })
+         
+      } else {
+    
+        user.avatar = ""
+            
         User.registar(user)
           .then(_ => {
             res.sendStatus(200)
@@ -65,25 +86,15 @@ router.post('/', upload.single('avatar'), (req, res) => {
           .catch(e => {
             res.status(500).jsonp({erro: e})
           })
-        
-      } else {
-        res.status(500).jsonp({erro: e})
-
       }
-    })
-     
-  } else {
-
-    user.avatar = ""
-        
-    User.registar(user)
-      .then(_ => {
-        res.sendStatus(200)
-      }) 
-      .catch(e => {
-        res.status(500).jsonp({erro: e})
-      })
-  }
+    }
+    else{
+      res.status(500).jsonp({error : e})      
+    }
+  })
+  .catch(e => {
+    res.status(500).jsonp({error : e})
+  })
 
 })
 

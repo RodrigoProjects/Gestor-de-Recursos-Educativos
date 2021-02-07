@@ -9,7 +9,7 @@ export default function HomePage(props){
             <NavbarComp />
             <div className="index-content">
                 <LoginRegisterComp />
-                <NewsComp />
+                
             </div>
         </>
     )

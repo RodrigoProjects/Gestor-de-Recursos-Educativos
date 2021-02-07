@@ -13,6 +13,7 @@ import UserProfile from './UserProfile'
 import ListResources from './ListResources'
 import ResourceDetails from './ResourceDetails'
 import NewsPage from "./NewsPage.js";
+import Notifications from "./NotificationsComp.js";
 
 export default function CreatorPage(props){
     const history = useHistory()
@@ -47,6 +48,9 @@ export default function CreatorPage(props){
             </Route>
             <Route path={props.path + "/recursos/:id"}>
                 <ResourceDetails edit={false} path={props.path + "/recursos"}/>
+            </Route>
+            <Route path={props.path + "/notificacoes"}>
+                <Notifications path={props.path}/>
             </Route>
         </Switch>
         </>

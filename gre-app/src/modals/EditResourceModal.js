@@ -21,6 +21,7 @@ const EditProfileModal = (props) => {
     const [preview, setPreview] = useState()
     const [alert, setAlert] = useState("")
     const history = useHistory()
+    const {data: tipos, isPendingT, errorT} = useFetch('http://localhost:9702/api/tiporecursos', token)
 
     const onSelectFile = e => {
       if (!e.target.files || e.target.files.length === 0) {
@@ -131,12 +132,9 @@ const EditProfileModal = (props) => {
                 <Form.Label>Tipo</Form.Label>
                 <Form.Control required onChange={(e) => setRes({...res, "tipo": e.target.value})} name="tipo" as="select" defaultValue="Escolher..." value={res.tipo ? res.tipo : res.tipo == "" ? res.tipo : (resource.tipo)}>
                   <option value="">Escolher...</option>
-                  <option>Tese</option>
-                  <option>Teste</option>
-                  <option>Resolução de teste</option>
-                  <option>Slides teóricos</option>
-                  <option>Gravação de aula</option>
-                  <option>Trabalho de grupo</option>
+                  {tipos && tipos.map((el, idx) => {
+                    return (<option key={idx}>{el.tipo}</option>)
+                  })}
                 </Form.Control>
               </Form.Group>
              {JSON.parse(localStorage.getItem("user")).tipo == "Admin" && <Form.Group as={Col} controlId="formState">

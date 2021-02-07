@@ -5,7 +5,8 @@ var notificacaoSchema = new mongoose.Schema({
     "dataDeCriacao": {type: String, required: true},
     "remetente": {type: String, required: true},
     "destinatario": {type: String, required: true},
-    "descricao" : {type: String, required: true}
+    "descricao" : {type: String, required: true},
+    "href": String
 });
 
 module.exports = mongoose.model('notificacoes', notificacaoSchema)

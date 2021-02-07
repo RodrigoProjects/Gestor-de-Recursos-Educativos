@@ -83,12 +83,10 @@ router.post('/recursos', upload_recursos.fields([{
   let files = []
   let folder = uuidv4()
 
+  recurso._id = mongoose.Types.ObjectId();
   recurso.pasta = folder
-
   recurso.classificadores = []
-
   recurso.ficheiros = files
-
 
   let ficheiros = req.files.ficheiros
 
@@ -104,14 +102,8 @@ router.post('/recursos', upload_recursos.fields([{
       
     })
 
-    
-
-    if(req.files.imagem){
-
-      
+    if(req.files.imagem){      
       let image = req.files.imagem[0]
-      
-      
 
       fs.renameSync(path.join(__dirname, "../uploads/" + image.filename), path.join(__dirname,"../public/images/" + image.originalname))
 
@@ -119,15 +111,44 @@ router.post('/recursos', upload_recursos.fields([{
       
     } else {
       recurso.imagem = ""
-  
     }
-
 
     recurso.dataDeCriacao = new Date().toISOString()
 
     Recurso.insert(recurso)
       .then(_ =>{
-        res.sendStatus(200)
+        if(recurso.acesso == "Público" && recurso.estado == "Confirmado"){
+          Noticia.insert({
+            "titulo": "Novo Recurso: " + recurso.titulo,
+            "conteudo": recurso.descricao,
+            "imagem": "",
+            "dataDeCriacao": recurso.dataDeCriacao,
+            "autor": recurso.autor,
+            "href": "recursos/" + recurso._id 
+          })
+          .then(_ =>{
+            res.sendStatus(200)
+          })
+          .catch(e => {
+            res.status(500).jsonp({error: e})
+          })
+        }
+        else if (recurso.acesso == "Público" && recurso.estado == "Em avaliação"){
+          Pedido.insert({
+            "recurso_id": recurso._id,
+            "estado": "Em avaliação",
+            "dataDeCriacao": recurso.dataDeCriacao         
+          })
+          .then(_ =>{
+            res.sendStatus(200)
+          })
+          .catch(e => {
+            res.status(500).jsonp({error: e})
+          })
+        }
+        else{
+          res.sendStatus(200)
+        }
       })
       .catch(e => {
         res.status(500).jsonp({error: e})
@@ -146,12 +167,31 @@ router.post('/recursos/comment/:id_recurso', function(req, res, next) {
   comentario.dataDeCriacao = new Date().toISOString()
 
   Recurso.updateComment(req.params.id_recurso,comentario)
-    .then(_ =>{
-      res.sendStatus(200)
+  .then(_ =>{
+    Recurso.getRecursoById(req.params.id_recurso)
+    .then(rec =>{
+      Notificacao.insert({
+        "tipo" : "Novo comentário",
+        "dataDeCriacao": new Date().toISOString(),
+        "remetente": comentario.autor,
+        "destinatario": rec.autor,
+        "descricao" : "Tem um novo comentário por ler em " + rec.titulo +".",
+        "href": "recursos/" + rec._id
+        })
+        .then(_ =>{
+          res.sendStatus(200)
+        })  
+        .catch(e => {
+          res.status(500).jsonp({error: e})
+        })          })
+
     })
     .catch(e => {
       res.status(500).jsonp({error: e})
-    })
+    })   
+  .catch(e => {
+      res.status(500).jsonp({error: e})
+    })        
 });
 
 router.post('/recursos/sub_comment', function(req, res, next) {
@@ -162,8 +202,27 @@ router.post('/recursos/sub_comment', function(req, res, next) {
   
     Recurso.pushSubComment(req.query.id_recurso,req.query.id_comentario,comentario)
       .then(_ =>{
-        res.sendStatus(200)
-      })
+        Recurso.getRecursoById(req.query.id_recurso)
+        .then(rec =>{
+          Notificacao.insert({
+            "tipo" : "Resposta ao comentário",
+            "dataDeCriacao": new Date().toISOString(),
+            "remetente": comentario.autor,
+            "destinatario": rec.autor,
+            "descricao" : "Tem uma nova resposta por ler em " + rec.titulo +".",
+            "href": "recursos/" + rec._id
+            })
+            .then(_ =>{
+              res.sendStatus(200)
+            })  
+            .catch(e => {
+              res.status(500).jsonp({error: e})
+            })          })
+    
+        })
+        .catch(e => {
+          res.status(500).jsonp({error: e})
+        })   
       .catch(e => {
         res.status(500).jsonp({error: e})
       })
@@ -218,7 +277,6 @@ router.put('/recursos/:id', upload_recursos.single('imagem') ,function(req, res,
       if(!e){
         recurso.imagem = req.file.filename + "." + req.file.mimetype.split('/')[1]
 
-        console.log(recurso)
         Recurso.update(req.params.id,recurso)
         .then(_ =>{
           res.sendStatus(200)
@@ -233,9 +291,48 @@ router.put('/recursos/:id', upload_recursos.single('imagem') ,function(req, res,
     })
      
   } else {
-  Recurso.update(req.params.id,req.body)
+  Recurso.update(req.params.id,recurso)
     .then(_ =>{
-      res.sendStatus(200)
+      Recurso.getRecursoById(req.params.id)
+      .then(rec =>{
+        if(rec.acesso == "Público"){
+          Noticia.insert({
+            "titulo": "Novo Recurso: " + rec.titulo,
+            "conteudo": rec.descricao,
+            "imagem": "",
+            "dataDeCriacao": rec.dataDeCriacao,
+            "autor": rec.autor,
+            "href": "recursos/" + rec._id
+          })
+          .then(_ =>{
+            if(recurso.estado == "Em avaliação"){
+              Pedido.insert({
+                "recurso_id": rec._id,
+                "estado": "Em avaliação",
+                "dataDeCriacao": rec.dataDeCriacao         
+              })
+              .then(_ =>{
+                console.log("ola")
+                res.sendStatus(200)
+              })
+              .catch(e => {
+                res.status(500).jsonp({error: e})
+              })
+            }
+            else{
+              res.sendStatus(200)
+            }
+          })
+          .catch(e => {
+            res.status(500).jsonp({error: e})
+          })
+        }else{
+          res.sendStatus(200)
+        }
+      })
+      .catch(e => {
+        res.status(500).jsonp({error: e})
+      })   
     })
     .catch(e => {
       res.status(500).jsonp({error: e})
@@ -247,7 +344,21 @@ router.put('/recursos/:id', upload_recursos.single('imagem') ,function(req, res,
 router.delete('/recursos/:id', function(req, res, next) {
   Recurso.delete(req.params.id)
     .then(_ =>{
-      res.sendStatus(200)
+      //apagar todas as noticias e pedidos ao recurso
+      Pedido.deleteByRecurso(req.params.id)
+      .then(_ =>{
+        Noticia.deleteByRecurso(req.params.id)
+        .then(_ =>{
+          res.sendStatus(200)
+        })
+        .catch(e => {
+          res.status(500).jsonp({error: e})
+        })
+      })
+      .catch(e => {
+        res.status(500).jsonp({error: e})
+      })      
+
     })
     .catch(e => {
       res.status(500).jsonp({error: e})
@@ -284,8 +395,64 @@ router.post('/pedidos', function(req, res, next) {
 router.put('/pedidos/:id', function(req, res, next) {
   Pedido.update(req.params.id,req.body)
     .then(_ =>{
-      res.sendStatus(200)
-    })
+      Recurso.getRecursoById(req.body.recurso_id)
+      .then(rec=>{
+        if(req.body.estado == "Confirmado"){
+          Recurso.update(req.body.recurso_id, {estado: "Confirmado"})
+          .then(_=>{
+            Notificacao.insert({
+              "tipo" : "Análise de Pedido",
+              "dataDeCriacao": new Date().toISOString(),
+              "remetente": "Administrador",
+              "destinatario": rec.autor,
+              "descricao" : "O seu pedido foi aceite.",
+              "href": "recursos/" + rec._id
+              })
+              .then(_ =>{
+                Noticia.insert({
+                  "titulo": "Novo Recurso: " + rec.titulo,
+                  "conteudo": rec.descricao,
+                  "imagem": "",
+                  "dataDeCriacao": rec.dataDeCriacao,
+                  "autor": rec.autor,
+                  "href": "recursos/" + rec._id
+                }).then(_=>{
+                  res.sendStatus(200)
+                })
+                .catch(e => {
+                  res.status(500).jsonp({error: e})
+                })
+              })  
+              .catch(e => {
+                res.status(500).jsonp({error: e})
+              })          })
+          .catch(e => {
+            res.status(500).jsonp({error: e})
+          })        
+        }
+        else {
+          Recurso.delete(req.body.recurso_id)
+          .then(_=>{
+            Notificacao.insert({
+            "tipo" : "Análise de Pedido",
+            "dataDeCriacao": new Date().toISOString(),
+            "remetente": "Administrador",
+            "destinatario": rec.autor,
+            "descricao" : "O seu pedido foi recusado. " + req.body.comentario 
+            })
+            .then(_ =>{              
+              res.sendStatus(200)
+            })  
+            .catch(e => {
+              res.status(500).jsonp({error: e})
+            })
+          })
+          .catch(e => {
+            res.status(500).jsonp({error: e})
+          })        
+        }
+      })
+    })        
     .catch(e => {
       res.status(500).jsonp({error: e})
     })
@@ -309,6 +476,16 @@ router.get('/noticias', function(req, res, next) {
   Noticia.getNoticias()
     .then(nots =>{
       res.jsonp(nots)
+    })
+    .catch(e => {
+      res.status(500).jsonp({error: e})
+    })
+});
+
+router.get('/noticias/:id', function(req, res, next) {
+  Noticia.getNoticiasById(req.params.id)
+    .then(not =>{
+      res.jsonp(not)
     })
     .catch(e => {
       res.status(500).jsonp({error: e})
@@ -352,14 +529,42 @@ router.post('/noticias', upload_recursos.single('imagem') ,function(req, res, ne
   }
 });
 
-router.put('/noticias/:id', function(req, res, next) {
-  Noticia.update(req.params.id,req.body)
+router.put('/noticias/:id', upload_recursos.single('imagem'),function(req, res, next) {
+
+
+  let noticia = req.body
+
+  if(req.file){
+
+    fs.rename(path.join(__dirname, "../uploads/" + req.file.filename), path.join(__dirname,"../public/noticias/" + req.file.filename + "." + req.file.mimetype.split('/')[1]), (e) => {
+      if(!e){
+        noticia.imagem = req.file.filename + "." + req.file.mimetype.split('/')[1]
+
+
+        Noticia.update(req.params.id,noticia)
+          .then(_ =>{
+            res.sendStatus(200)
+          })
+          .catch(e => {
+            res.status(500).jsonp({error: e})
+          })
+        
+      } else {
+        res.status(500).jsonp({erro: e})
+      }
+    })
+     
+  } else {
+
+    Noticia.update(req.params.id,noticia)
     .then(_ =>{
       res.sendStatus(200)
     })
     .catch(e => {
       res.status(500).jsonp({error: e})
     })
+  }
+
 });
 
 router.delete('/noticias/:id', function(req, res, next) {
@@ -386,7 +591,7 @@ router.get('/notificacoes', function(req, res, next) {
 });
 
 router.get('/notificacoes/:email', function(req, res, next) {
-  Notificacao.getNotificacoesByAddressee(req.body.email)
+  Notificacao.getNotificacoesByAddressee(req.params.email)
     .then(notfs =>{
       res.jsonp(notfs)
     })

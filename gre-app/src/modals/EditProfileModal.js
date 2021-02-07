@@ -58,7 +58,6 @@ const EditProfileModal = (props) => {
             setAlert(null)
             setSelectedFile(undefined)
             setUser({})
-            localStorage.setItem("created", "Utilizador editado!")
             props.onSuccess()
 
           } else if (res.status == 401) {

@@ -178,3 +178,27 @@
 .star-active{
     fill: darkgoldenrod;
 }
+
+.icon:hover{
+    transform: scale(1.05)
+}
+
+.pedidos{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.pedidos-section{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    border-bottom: 2px solid  gainsboro;
+}
+
+.notifications{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}

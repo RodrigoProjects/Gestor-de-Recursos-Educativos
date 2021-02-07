@@ -10,7 +10,7 @@ var recursoSchema = new mongoose.Schema({
     "classificadores": [{user:String, classificacao: {type: Number, default: 0}}],
     "imagem": String,
     "acesso": {type: String, required: true},
-    "estado": {type: String, default: 'Ativo'},
+    "estado": {type: String, default: 'Em avaliação'},
     "comentarios": [{_id: mongoose.Types.ObjectId,autor: String, dataDeCriacao: String, conteudo: String, comentarios: [{_id: mongoose.Types.ObjectId,autor: String, dataDeCriacao: String, conteudo: String}]}],
     "descricao" : String
 });

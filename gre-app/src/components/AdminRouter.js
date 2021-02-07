@@ -12,6 +12,7 @@ import ListUsers from './ListUsers'
 import ListResources from './ListResources'
 import ResourceDetails from './ResourceDetails'
 import NewsPage from './NewsPage'
+import RequestsComp from './RequestsComp'
 
 export default function AdminPage(props){
     const history = useHistory()
@@ -38,13 +39,16 @@ export default function AdminPage(props){
                     <ListUsers />
                 </Route>
                 <Route path={props.path + "/noticias"}>
-                    <NewsPage edit={true}/>
+                    <NewsPage path={props.path} edit={true}/>
                 </Route>
                 <Route path={props.path + "/recursos"} exact>
                     <ListResources type="" path={props.path + "/recursos"}/>
                 </Route>
                 <Route path={props.path + "/recursos/:id"}>
                     <ResourceDetails edit={true} path={props.path + "/recursos"}/>
+                </Route>
+                <Route path={props.path + "/pedidos"}>
+                    <RequestsComp path={props.path}/>
                 </Route>
             </Switch>
         </>

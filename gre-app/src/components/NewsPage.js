@@ -9,12 +9,16 @@ import { FaTimes } from "react-icons/fa";
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import CreateNoticiaModal from "../modals/CreateNoticiaModal";
+import { useHistory } from "react-router";
 
 export default function NewsPage(props){
+
+    const history = useHistory()
 
     const [showAlert, setShow] = useState(true);
     const [search, setSearch] = useState("")
     const [createModal, setCreateModal] = useState(false)
+    const [success, setSuccess] = useState(true)
 
     return(
         <div className="index-content">
@@ -26,14 +30,9 @@ export default function NewsPage(props){
             {props.edit && <Button variant="outline-success" onClick={() => setCreateModal(true)}><AiOutlinePlus size={25} /></Button>}
             </div>
             <div className="separator-users">
-                {localStorage.getItem("created") && showAlert &&  
-                <Alert variant="success" onClose={() => {setShow(false); localStorage.removeItem("created")}} dismissible>
-                    <Alert.Heading>{localStorage.getItem("created")}</Alert.Heading>
-                </Alert>
-                }
             </div>
-            <NewsComp /> 
-            <CreateNoticiaModal showAlert={() => {setShow(true)}} show={createModal} onHide={() => setCreateModal(false)}/>
+            <NewsComp path={props.path} edit={props.edit} success={success} search={search} setSuccess={() => setSuccess(false)}/> 
+            <CreateNoticiaModal showAlert={() => {setShow(true); setSuccess(true)}} show={createModal} onHide={() => setCreateModal(false)}/>
         </div>
     )
 }
